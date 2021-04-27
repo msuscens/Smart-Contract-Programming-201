@@ -19,5 +19,47 @@ updateEntity(). Updates the data in a saved entity for msg.sender
 After you have built the 2 contracts, I want you to answer the following questions.
 
 When executing the addEntity function, which design consumes the most gas (execution cost)? Is it a significant difference? Why/why not?
-Add 5 Entities into storage using the addEntity function and 5 different addresses. Then update the data of the fifth address you used. Do this for both contracts and take note of the gas consumption (execution cost). Which solution consumes more gas and why?
+Add 5 Entities into storage using the addEntity function and 5 different addresses. Then update the data of the fifth address you used.
+Do this for both contracts and take note of the gas consumption (execution cost). Which solution consumes more gas and why?
 
+
+MY SOLUTION / ANSWER
+
+Assumptions (for both contracts):
+   addentity() - must only add an entity for this address if one doesn't already exist.
+   updateEntity() - must only update an entity if one already exists for this address.
+
+See the StorageInMapping and StorageInArray contracts that I've written.
+
+Results of code execution: addEntity() function used to add an entry for only one address: 
+1. StorageInMapping
+ transaction cost:	63880 gas
+ execution cost:    42416 gas 
+
+2. StorageInArray
+ transaction cost:	84661 gas 
+ execution cost:	63197 gas 
+
+There's already a significant difference in gas execution cost.
+The StorageInArray design consumes about 50% more gas in execution cost than the StoreInMapping design.
+This is because array storage is more costly than storage in a mapping.  Whilst the array is iterated
+to check that an entry doesn't already exist; there is only one storage entry (and so just one array
+element to check).  This shows that a single array read and write costs significantly more than a 
+single mapping read and write operation. 
+
+For each contract : Adding 5 entities (to 5 different addresses) using addEntity(),then
+updating 5th entry with updateEntity():
+
+1. StorageInMapping (when updating 5th entity)
+ transaction cost:	27944 gas
+ execution cost:     6480 gas 
+        TOTAL:      34424
+        
+2. StorageInArray (when updating 5th entity)
+ transaction cost:	55217 gas
+ execution cost:    33753 gas 
+        TOTAL:      88960
+
+The storage array design consumes significantly more gas (over 5x the execution cost) as the effect of having to iterate through the
+five array entries (to find the index into the array for the address in question) is taking its toll.  The gas cost will continue to
+increase as the number of entities stored increases (ie. size of the array increases).
