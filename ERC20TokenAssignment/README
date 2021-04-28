@@ -1,0 +1,8 @@
+ERC20 Token Assignment:
+Using the provided ERC20 Tokken template, write the token contract functions:
+    transfer()
+    approve()
+    allowance()
+    transferFrom()
+
+    
