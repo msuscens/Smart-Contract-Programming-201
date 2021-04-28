@@ -20,36 +20,39 @@ https://forum.ivanontech.com/t/assignment-erc721/33588
 
 
 MY ANSWERS:
-1. Constant amount of time/executions (and therfeore gas) to create a new cat.
+1. Constant amount of time/executions (and therefore gas) to create a new cat.
 This is because there are only direct access into mappings and pushing new cat
 to an array. There is no looping that depends upon the number of cats already
 created. 
 
-2. The getAllCatsFor function has a linererly increasing amount of operations
+2. The getAllCatsFor function has a linearly increasing amount of operations
 because the code needs to iterate through the whole array of cats.  The more
 cats that exist the bigger this array and the more iterations are required to
 check each cat to see if it belongs to the specified owner.  The gas cost to 
-execute this function would therefore linerar increase with the number of cats.
+execute this function would therefore linear increase with the number of cats.
 
 3. The getAllCatsFor function could be improved by introducing a new mapping
 that links an address to an array of cat ids that they own.  In this way, the
 function would not have to iterate through the array of all cats and the
-execution (gas cost) would become constant.  If the number of cats in existance
-gre very large this function would become very expensive!
+execution (gas cost) would become constant.  If the number of cats in existence
+is very large this function would become very expensive!
 
 See KittyContract2 for my solution.  Where I've introduced a new mapping:
     mapping (address => uint256[]) ownersCats;
-And then maintained this mapping in the _transfer function. This allows my
-revised version of the getAllCatsFor function to simply return the array of
+And then maintained this mapping in the _transfer function. This allows my 
+amended version of the getAllCatsFor function to simply return the array of
 cat ids (by a simple lookup in the ownersCats mapping).
-The disadvantage is that the _transfer function, upon a cat being transfered
+The disadvantage is that the _transfer function, upon a cat being transferred
 from an existing owner to a new owner, needs to loop through the array of the
-transferor's cats to remove their array of owned cats (in owenersCats mapping).
+transferor's cats to remove their array of owned cats (in ownersCats mapping).
 It does this by calling a new function _removeCat.  Whilst this makes the 
 _transfer function execution somewhat non-constant, it only needs to iterate
-through the previous owners cats - so as more users participate and the number
-of cats owne increases the execution cost is likely to increase but it will be
-a lot less than a linear increase.
+through the previous owner's cats - so the execution cost is will linearly increase
+but this will be based on the number of cats owned by the transferor (not the total
+number of cats).
+
+I'm now thinking there could be an even better way by using a double mapping
+- I will think about this further!  Hrmmm...
 
 I'm now thinking there could be an even better way by using a double mapping
 - I will think on this further!  Hrmmm...
