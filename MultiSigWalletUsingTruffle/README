@@ -1,0 +1,43 @@
+Assignment - Truffle
+Truffle
+Your assignment is to use Truffle to deploy the multisig wallet we developed in the
+Ethereum Smart Contract Programming 101 Course. Then you should try to interact with
+it using the Truffle console.
+
+The videos where we built the wallet is available here:
+https://academy.ivanontech.com/products/ethereum-smart-contract-programming-101-2/categories/4224524
+
+The final wallet code is available here:
+https://github.com/filipmartinsson/solidity-0.7.5/blob/main/project-final-code.sol
+
+
+NOTES: How I completed the Assignment:
+1) I've used my own MultiSigWallet code (that I developed during the Solidity-101 course)
+2) I updated the truffle.config file with (solc) compiler version (^0.8.4) and my local 
+developement network details
+3) I updated the code files to use "pragma solidity ^0.8.4;" and amened now incompatible
+code in my MultiSigWallet contract, ie.
+    The conversion of non-payble address to address payable, now uses 'payable(sendTo)' to
+    convert the sendTo address instead of: 'address payable to = address(uint160(sendTo));'
+4) Add a migrations file: 2_MultiSigWallet.js
+5) I used ganache-cli to create a local blockchain to migrate (deploy) the MultiSigWallet
+(rather than using the 'truffle develop' console to create a local blockchain ), i.e.
+ganache-cli -h 127.0.0.1 -p 8545 -m "quick brown fox jumped over the lazy dog"
+Therefore the accounts are the same each time I exit, restart ganache-cli and so I've set
+the owner addresses as constants in the migrations file (MultiSigWallet.js)
+6)'truffle console' to enter the truffle(development) console and then executed various
+MultiSigWallet contract functions on the deployed instance, eg.
+    truffle(development)> let instance = await MultisigWallet.deployed
+    truffle(development)> instance.getWalletCreator()
+    truffle(development)> instance.deposit({value:'10000', from: accounts[0]})
+    truffle(development)> instance.getWalletBalance()
+    etc.
+
+
+
+
+
+
+
+
+
