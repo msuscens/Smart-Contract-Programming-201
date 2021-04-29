@@ -25,8 +25,8 @@ code in my MultiSigWallet contract, ie.
 ganache-cli -h 127.0.0.1 -p 8545 -m "quick brown fox jumped over the lazy dog"
 Therefore the accounts are the same each time I exit, restart ganache-cli and so I've set
 the owner addresses as constants in the migrations file (MultiSigWallet.js)
-6)'truffle console' to enter the truffle(development) console and then executed various
-MultiSigWallet contract functions on the deployed instance, eg.
+6) Interacting with the contract from the 'truffle console': Executed various MultiSigWallet
+contract functions on the deployed instance, eg.
     truffle(development)> let instance = await MultisigWallet.deployed
     truffle(development)> instance.getWalletCreator()
     truffle(development)> instance.deposit({value:'10000', from: accounts[0]})
