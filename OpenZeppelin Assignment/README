@@ -1,0 +1,15 @@
+Custom Extensions & Assignment
+Openzeppelin
+Your assignment is to create a new ERC20 token contract from the Openzeppelin
+template ERC20PresetMinterPauser and add cap functionality. Meaning that
+there is a maximum cap of token issuance. 
+
+You should also build a new function that allows you to modify the cap.
+
+You should also study the AccessControl contract from Openzeppelin and 
+implement a new role in the same ERC20 contract. This role should be the only
+one to be able to change the contract's cap.
+
+Post your solution here: 
+https://forum.ivanontech.com/t/assignment-openzeppelin-templates/33838
+
