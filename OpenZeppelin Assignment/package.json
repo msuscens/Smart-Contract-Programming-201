@@ -1,0 +1,17 @@
+{
+  "name": "openzeppelin-assignment",
+  "version": "1.0.0",
+  "description": "Custom Extensions & Assignment Openzeppelin Your assignment is to create a new ERC20 token contract from the Openzeppelin template ERC20PresetMinterPauser and add cap functionality. Meaning that there is a maximum cap of token issuance.",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.1.0"
+  }
+}

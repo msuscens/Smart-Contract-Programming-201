@@ -13,3 +13,99 @@ one to be able to change the contract's cap.
 Post your solution here: 
 https://forum.ivanontech.com/t/assignment-openzeppelin-templates/33838
 
+________________________________________________________________________
+
+MY ASSIGNMENT SOLUTION NOTES - What I did to implement the new token:
+
+PART A - Create a new ERC20 token contract from Openzeppelin template
+ERC20PresetMinterPauser
+
+1. Createted project/assignment directory
+
+2. npm init
+
+3. truffle init (NB. by mistake I did truflfel init and then npm init
+- so the package.json file, has truffle-config.js (instead of index.js)
+set as 'main'
+
+4. npm install @openzeppelin/contracts
+
+5. Copy the OZ contract ERC20PresetMinterPauser.sol file into truffle
+created contracts folder, renaming the file to MyToken.sol
+
+6. Updated the import paths to reflect files new location
+
+7. Updated truffle-config.js to add solc compiler version, and the 
+development network
+
+8. Renamed the contract from 'ERC20PresetMinterPauser' to 'MyToken'
+
+9. truffle compile - to confirm MyToken compiled sucessfully
+
+10. Created a new migrations file for MyToken contract (in the truffle
+created migrations folder). The deploy function call passes in the token
+name and token symbol (set as constants at the top of the migration file)
+
+11. In another (bash) terminal start a local ganache-cli bc, ie:
+        ganache-cli -h 127.0.0.1 -p 8545
+
+12. Test that the MyToken contract (as it stands) is deployable, ie.
+        truffle migrate --reset
+
+PART B: Add cap functionality (to the new ERC token contract). Meaning
+that there is a maximum cap of token issuance.  You should also build a
+new function that allows you to modify the cap.
+
+13. Find the OpenZeppelin ERC20Capped.sol in the OZ template library: 
+./node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol
+14. Copy from ERC20Capped.sol the state variables and functions into
+myToken contract, ie.
+    uint256 immutable private _cap; and the functions: cap() and _mint(...)
+
+15. ERC20Capped.sol constructor code was copied & pasted into MyToken
+constructor, ie.
+    require(cap_ > 0, "ERC20Capped: cap is 0");
+    _cap = cap_;
+
+16. Modified MyToken's constructor to take an additional parameter cap_ (that
+was originally passed into ERC20Capped's constructor), and updated the deployment
+file: 2_myToken_migration.js (in migrations folder) to pass-in the total supply
+cap to the MyToken constructor (upon deploy)
+
+17. truffle compile
+
+18. truffle migrate --reset
+
+PART C: Study the AccessControl contract from Openzeppelin and 
+implement a new role in the same ERC20 contract. This role should be the only
+one to be able to change the contract's cap.
+
+19. In MyToken contract add a new cap admin role as a state variable, ie.
+        bytes32 public constant CAP_ADMIN_ROLE = keccak256("CAP_ADMIN_ROLE");
+
+20. In MyToken contract's constructor, assign the new role to the contract
+creator, ie. _setupRole(CAP_ADMIN_ROLE, _msgSender());
+
+21. Remove the 'immutable' from the _cap state variable
+
+22. Add function allowing the cap admin (only) to change the contract's cap, ie.
+        function changeCap(uint256 newCap) public virtual {
+            require(hasRole(CAP_ADMIN_ROLE, _msgSender()), "ERC20Capped: have cap admin role");
+            _changeCap(newCap)
+        }
+
+        function _changeCap(uint256 newCap) internal virtual {
+            _cap = newCap;
+        }
+
+23. truffle compile
+
+24. truffle migrate --reset
+
+25. truffle console
+
+26. Interact with the contact, first enter: truffle console
+        truffle(development): let instance = await MyToken.deployed()
+        truffle(development): instance.cap()
+        truffle(development): instance.changeCap(20000)
+        truffle(development): instance.cap()
