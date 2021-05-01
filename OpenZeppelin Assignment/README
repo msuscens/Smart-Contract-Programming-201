@@ -89,12 +89,12 @@ creator, ie. _setupRole(CAP_ADMIN_ROLE, _msgSender());
 21. Remove the 'immutable' from the _cap state variable
 
 22. Add function allowing the cap admin (only) to change the contract's cap, ie.
-        function changeCap(uint256 newCap) public virtual {
+        function setCap(uint256 newCap) public virtual {
             require(hasRole(CAP_ADMIN_ROLE, _msgSender()), "ERC20Capped: have cap admin role");
-            _changeCap(newCap)
+            _setCap(newCap)
         }
 
-        function _changeCap(uint256 newCap) internal virtual {
+        function _setCap(uint256 newCap) internal virtual {
             _cap = newCap;
         }
 
@@ -107,5 +107,5 @@ creator, ie. _setupRole(CAP_ADMIN_ROLE, _msgSender());
 26. Interact with the contact, first enter: truffle console
         truffle(development): let instance = await MyToken.deployed()
         truffle(development): instance.cap()
-        truffle(development): instance.changeCap(20000)
+        truffle(development): instance.setCap(20000)
         truffle(development): instance.cap()

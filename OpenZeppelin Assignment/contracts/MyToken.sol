@@ -104,17 +104,17 @@ contract MyToken is Context, AccessControlEnumerable, ERC20Burnable, ERC20Pausab
 
     /**
      * @dev Changes the contract's token cap.
-     *     *
+     * 
      * Requirements:
      *
      * - the caller must have the `CAP_ADMIN_ROLE`.
      */
-    function changeCap(uint256 newCap) public virtual {
+    function setCap(uint256 newCap) public virtual {
         require(hasRole(CAP_ADMIN_ROLE, _msgSender()), "ERC20Capped: have cap admin role");
-        _changeCap(newCap);
+        _setCap(newCap);
     }
 
-    function _changeCap(uint256 newCap) internal virtual {
+    function _setCap(uint256 newCap) internal virtual {
         _cap = newCap;
     }
 
