@@ -1,0 +1,9 @@
+Project: Building a Decentralised DEX
+
+Assignment
+Build a DEX where a user can deposit ETH and ERC20 tokens.  The tokens can
+be bought using ETH (but not other ERC-20 tokens).  Users should be able to
+create both buy orders and sell orders, which will be stored in an on-chain
+order book.  Users will also be able to place market orders (where they will
+buy from the best offer in the the order book).
+
