@@ -7,3 +7,69 @@ create both buy orders and sell orders, which will be stored in an on-chain
 order book.  Users will also be able to place market orders (where they will
 buy from the best offer in the the order book).
 
+
+______________________________________________________________________________
+
+My Project Developement Steps & Notes (as I implement the project):
+
+1. Write a basic Wallet contract with functions:
+    addToken,
+    deposit, and
+    withdraw
+
+2. Write a mock token contract (LinkMock in tokens.sol) that will be used for
+Wallet testing purposes.  (Will add other mock tokens later to tokens.sol)
+
+3. Add migration scripts for the Wallet and LinkMock contracts:
+    $ truffle develop
+    truffle(develop)> migrate
+    truffle(develop)> let wallet = await Wallet.deployed()
+    truffle(develop)> let link = await LinkMock.deployed()
+    truffle(develop)> link.balanceOf(accounts[0])  // To check that we have 1000 LINK
+    truffle(develop)> wallet.addToken(web3.utils.fromUtf8("LINK"),link.address )
+    // Note In truffle use Web3.utils.fromUtf8(<string>) to convert to btyes32 from string
+    // (in solidity we could simply convert by: byttes32("LINK");
+    // link.address is obtained from Truffle
+
+4. Add LINK token as a Wallet known token (and check that it has been added) 
+    truffle(develop)> wallet.addToken(web3.utils.fromUtf8("LINK"),link.address)
+    truffle(develop)> wallet.tokenList(0)                               //To check the token ticker has been added
+    truffle(develop)> wallet.tokenMapping(web3.utils.fromUtf8("LINK"))  //Get ticker and token's contract address
+    truffle(develop)> link.address                                      //Check our stored token's address is the
+                                                                        //actual LINK contract address
+5. Check that Wallet deposit function works - first check that wallet can't transfer funds (from LINK contract)
+without first been given approval to transfer owner's funds:
+    truffle(develop)> wallet.deposit(100, web3.utils.fromUtf8("LINK"))
+    Error: "revert': 'ERC20: transfer amount exceeds allowance'
+
+6. Give the Wallet approval and then try again to transfer LINK tokens:
+    truffle(develop)> link.approve(wallet.address, 500)
+    truffle(develop)> wallet.deposit(100, web3.utils.fromUtf8("LINK"))
+    truffle(develop)> wallet.balances(accounts[0], web3.utils.fromUtf8("LINK"))
+
+7.  Extend tokens migrations (2_tokens_migration.js) to automate above testing,
+    migrate again and check the wallet balance for LINK token:
+    const LinkMock = artifacts.require("LinkMock")
+    const Wallet = artifacts.require("Wallet")
+
+    module.exports = async function (deployer, network, accounts) {
+        await deployer.deploy(LinkMock)
+        let wallet = await Wallet.deployed()
+        let link = await LinkMock.deployed()
+        await link.approve(wallet.address, 500)
+        await wallet.addToken(web3.utils.fromUtf8("LINK"),link.address)
+        await wallet.deposit(100, web3.utils.fromUtf8("LINK"))
+        const linkBalance = await wallet.balances(accounts[0], web3.utils.fromUtf8("LINK"))
+        console.log("LINK balance: "+linkBalance)
+    }
+
+    truffle(develop)> migrate --reset
+    LINK balance: 100
+
+    
+
+
+
+
+
+

@@ -12,7 +12,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [],
@@ -25,7 +26,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -2188,9 +2190,17 @@
     "name": "solc",
     "version": "0.8.4+commit.c7e474f2.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0x90c473d130FFD47Eb1975D53484314c884D369C0",
+      "transactionHash": "0x2d508b20a343401c756aabb6ba4c25ed7ce82f13ac50547a4bb88cbf98c93e74"
+    }
+  },
   "schemaVersion": "3.4.0",
-  "updatedAt": "2021-05-01T16:53:01.256Z",
+  "updatedAt": "2021-05-04T14:54:49.361Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},
