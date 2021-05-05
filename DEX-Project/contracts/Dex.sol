@@ -21,7 +21,7 @@ contract Dex is Wallet {
     }
     // order.side = Side.BUY;
 
-    mapping(bytes32 => mapping(uint => Order[])) orderBook;    //Ticker => (Side => orders)
+    mapping(bytes32 => mapping(uint => Order[])) public orderBook;    //Ticker => (Side => orders)
 
     function getOrderBook(bytes32 ticker, Side side) view public returns(Order[] memory) {
         return(orderBook[ticker][uint(side)]);
@@ -30,8 +30,8 @@ contract Dex is Wallet {
     //  getOrderBook(bytes32("LINK"), Side.BUY);
 
 
-    function createLimitOrder() public {
-        // TODO
-    }
+    // function createLimitOrder() public {
+    //     // TODO
+    // }
 
 }

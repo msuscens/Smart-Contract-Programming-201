@@ -59,7 +59,8 @@ without first been given approval to transfer owner's funds:
         await link.approve(wallet.address, 500)
         await wallet.addToken(web3.utils.fromUtf8("LINK"),link.address)
         await wallet.deposit(100, web3.utils.fromUtf8("LINK"))
-        const linkBalance = await wallet.balances(accounts[0], web3.utils.fromUtf8("LINK"))
+        const linkBalance =
+            await wallet.balances(accounts[0], web3.utils.fromUtf8("LINK"))
         console.log("LINK balance: "+linkBalance)
     }
 
@@ -67,6 +68,14 @@ without first been given approval to transfer owner's funds:
     LINK balance: 100
 
 8. Create basic DEX contract structure (Dex.sol), with a getOrderBook function
+(not yet tested).
+
+9. Rename the wallet migration file and contents for use with Dex
+(e.g. 2_wallet_migration.js -> 2_dex_migration.js)  And likewise update the
+3_token_migration.js file to use the Dex instead of the Wallet.
+
+10. Add wallet test scripts to test the dex/wallet (walletTest.js), specically
+writing tests for wallet functions addToken(), deposit() and withdrawal()
 
 
 
