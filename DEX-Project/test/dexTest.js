@@ -54,6 +54,17 @@ contract("Dex", accounts => {
            ),
            "Created buy-side limit order with to few deposited ETH given amount tokens required!"
         )
+        await truffleAssert.passes(
+            dex.createLimitOrder(
+               web3.utils.fromUtf8("LINK"),
+               0,   //Buy-side
+               10,  //price
+               10,  //amount
+               {from: accounts[0]}
+           ),
+           "Enough deposited ETH for limit buy-side order but failed for unknown reason!"
+        )
+
     })
 
     it("should have required tokens deposited in the users account for the sell order", async () => {
@@ -75,6 +86,7 @@ contract("Dex", accounts => {
             "Created sell-side limit order despite not having no tokens to sell!"
         )
 
+        await link.approve(dex.address, 100)
         await dex.deposit(100, web3.utils.fromUtf8("LINK"))
         await truffleAssert.passes(
             dex.createLimitOrder(
@@ -148,6 +160,8 @@ contract("Dex", accounts => {
         await dex.addToken(
             web3.utils.fromUtf8("LINK"),link.address, {from: accounts[0]}
         )
+        await link.approve(dex.address, 80)
+        await dex.deposit(80, web3.utils.fromUtf8("LINK"))
 
         await dex.createLimitOrder(
             web3.utils.fromUtf8("LINK"),
@@ -199,15 +213,14 @@ contract("Dex", accounts => {
         const dex = await Dex.deployed()
         const link = await LinkMock.deployed()
 
-        // DON'T ADD "LINK" AS A KNOWN TOKEN
-        // await dex.addToken(
-        //     web3.utils.fromUtf8("LINK"),link.address, {from: accounts[0]}
-        // )
+        await dex.addToken(
+             web3.utils.fromUtf8("LINK"),link.address, {from: accounts[0]}
+        )
 
         await dex.depositETH({value: 80})
         await truffleAssert.reverts(
             dex.createLimitOrder(
-               web3.utils.fromUtf8("LINK"),
+               web3.utils.fromUtf8("AAVE"),
                0,  //Buy-side
                10, //price
                8,  //amount
@@ -215,9 +228,10 @@ contract("Dex", accounts => {
            ),
            "Created buy-side limit order despite not knowing the token!"
         )
-        await truffleAssert.reverts(
+
+         await truffleAssert.reverts(
             dex.createLimitOrder(
-               web3.utils.fromUtf8("LINK"),
+               web3.utils.fromUtf8("AAVE"),
                1,  //Sell-side
                10, //price
                8,  //amount
@@ -225,6 +239,19 @@ contract("Dex", accounts => {
            ),
            "Created sell-side limit order despite not knowing the token!"
         )
+
+        await link.approve(dex.address, 10)
+        await dex.deposit(10, web3.utils.fromUtf8("LINK"))
+        await truffleAssert.passes(
+            dex.createLimitOrder(
+                web3.utils.fromUtf8("LINK"),
+                1,  //Sell-side
+                10, //price
+                10   //amount
+            ),
+            "Known token but failed to create a limit sell-order for unknown reason!"
+        )
+
     })
 
     it("should create buy and sell orders with the correct details", async () => {
@@ -271,6 +298,8 @@ contract("Dex", accounts => {
         )
 
         // Sell-side order
+        await link.approve(dex.address, 12)
+        await dex.deposit(12, web3.utils.fromUtf8("LINK"))
         const sellOrder = await dex.createLimitOrder(
             web3.utils.fromUtf8("LINK"),
             1,  //Sell-side
