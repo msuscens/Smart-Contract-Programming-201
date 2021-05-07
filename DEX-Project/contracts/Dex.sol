@@ -29,9 +29,29 @@ contract Dex is Wallet {
     // Note: Call would be :
     //  getOrderBook(bytes32("LINK"), Side.BUY);
 
-
-    // function createLimitOrder() public {
+/*
+    function createLimitOrder(bytes32 ticker, Side side, uint price, uint amount)
+        external
+        isKnownToken(ticker)
+        returns(Order memory limitOrder) 
+    {
     //     // TODO
-    // }
+        return limitOrder;
+    }
+*/
 
+    function createLimitOrder(bytes32 ticker, Side side, uint price, uint amount)
+        external
+        returns(Order memory limitOrder) 
+    {
+
+    }
+
+    function depositETH() public payable {
+
+    }
+
+    function getETHBalance() view public returns(uint ethBalance){
+
+    }
 }

@@ -77,6 +77,12 @@ without first been given approval to transfer owner's funds:
 10. Add wallet test scripts to test the dex/wallet (walletTest.js), specically
 writing tests for wallet functions addToken(), deposit() and withdrawal()
 
+11. Add DEX test scripts (dexTest.js), specically in preparation for writting
+createLimitOrder function. Ie. TDD approach of writing tests before function
+implementation.
+(Note this is my 'Limit Order Test Assignment' that I posted into the forum: 
+https://forum.ivanontech.com/t/assignment-limit-order-test/33821/57 )
+
 
 
 
