@@ -89,7 +89,9 @@ the new order is added to the end of the previously sorted array.
 (Note there are more efficient sort algorithms but sorting the updated
 order book by implementing a bubble sort was the assignment task.)
 
-
+13. Write plan for market order tests (i.e. a list of tests to be develped),
+in new test file: dexMarketOrderTest.js (Also rename walletTest.js to
+dexWalletTest.js)
 
 
 
