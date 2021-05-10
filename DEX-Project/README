@@ -93,6 +93,15 @@ order book by implementing a bubble sort was the assignment task.)
 in new test file: dexMarketOrderTest.js (Also rename walletTest.js to
 dexWalletTest.js)
 
+14. Refactor, including changes for Solidity v8:
+i) Remove safeMath - solidity now has overflow/underflow safe-guards (reverts)
+ii) Remove 'pragma experimental ABIEncoderV2;' as 'pragma abicoder v2;' is now
+used by default
+iii) Update migrations file to ensure it uses ^0.8.0
+iv) Add "// SPDX-License-Identifier: MIT" comment to .sol files (To eliminate
+licencing warnings)
+
+
 
 
 

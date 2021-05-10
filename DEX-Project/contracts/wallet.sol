@@ -1,11 +1,10 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
 contract Wallet is Ownable {
-    using SafeMath for uint256;
 
     struct Token {
         bytes32 ticker;
@@ -38,11 +37,11 @@ contract Wallet is Ownable {
     // token contract to perform this transfer of token ownership (ie. update its' internal
     // token balances)
     function deposit(uint amount, bytes32 ticker) external isKnownToken(ticker) {
-        require(amount > 0, "Asked to deposit 0 tokens!");                       // Checks
+        require(amount > 0, "Asked to deposit 0 tokens!");          // Checks
 
-        balances[msg.sender][ticker] = balances[msg.sender][ticker].add(amount); // Effects
+        balances[msg.sender][ticker] += amount;                     // Effects
 
-        IERC20(tokenMapping[ticker].tokenAddress).transferFrom(                  // Interact
+        IERC20(tokenMapping[ticker].tokenAddress).transferFrom(     // Interact
             msg.sender,
             address(this),
             amount
@@ -52,7 +51,8 @@ contract Wallet is Ownable {
     function withdraw(uint amount, bytes32 ticker) external isKnownToken(ticker) {
         require(balances[msg.sender][ticker] >= amount, "Balance not sufficient!");
 
-        balances[msg.sender][ticker] = balances[msg.sender][ticker].sub(amount);
+        balances[msg.sender][ticker] += amount;
+
         IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, amount);
     }
 }

@@ -1,12 +1,9 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-pragma experimental ABIEncoderV2;
 
-// TODO - import Wallet (via an interface??)
 import "./Wallet.sol";
 
 contract Dex is Wallet {
-
-    using SafeMath for uint256;
 
     enum Side {
         BUY,
@@ -41,7 +38,7 @@ contract Dex is Wallet {
     {
         if (side == Side.BUY)
             require(
-                balances[msg.sender]["ETH"] >= amount.mul(price),
+                balances[msg.sender]["ETH"] >= amount * price,
                 "Not enough ETH on deposit!"
             );
         else if (side == Side.SELL)
@@ -53,7 +50,7 @@ contract Dex is Wallet {
         
         Order[] storage orders = orderBook[ticker][uint(side)];
         orders.push(Order(nextId, msg.sender, side, ticker, amount, price));
-        nextId = nextId.add(1);
+        nextId++;
 
         if (side == Side.BUY) sortToDescedingPrice(orders);
         else if (side == Side.SELL) sortToAscendingPrice(orders);
@@ -61,7 +58,7 @@ contract Dex is Wallet {
 
 
     function depositETH() public payable {
-        balances[msg.sender]["ETH"] = balances[msg.sender]["ETH"].add(msg.value);
+        balances[msg.sender]["ETH"] += msg.value;
     }
 
 

@@ -1,8 +1,6 @@
-
 const Dex = artifacts.require("Dex")
 const LinkMock = artifacts.require("LinkMock")
 const truffleAssert = require('truffle-assertions')
-
 
 contract("Dex", accounts => {
 
@@ -67,7 +65,6 @@ contract("Dex", accounts => {
            ),
            "Enough ETH deposited but failed for unknown reason!"
         )
-
     })
 
     // The user must have enough tokens deposited such that token balance >= sell order amount
@@ -219,7 +216,7 @@ contract("Dex", accounts => {
            )
         )
 
-         await truffleAssert.reverts(
+        await truffleAssert.reverts(
             dex.createLimitOrder(
                web3.utils.utf8ToHex("AAVE"),
                1,  //Sell-side
@@ -240,7 +237,6 @@ contract("Dex", accounts => {
             ),
             "Known token but failed to create a limit sell-order for unknown reason!"
         )
-
     })
 
     // The created buy-side order must contain the correct details
