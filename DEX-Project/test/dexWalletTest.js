@@ -2,7 +2,7 @@ const Dex = artifacts.require("Dex")    //Dex is also a wallet
 const LinkMock = artifacts.require("LinkMock")
 const truffleAssert = require("truffle-assertions")
 
-contract("Dex", accounts => {
+contract.skip("Dex", accounts => {
     it("should only be possible for owner to add tokens", async () => {
         const dex = await Dex.deployed()
         const link = await LinkMock.deployed()

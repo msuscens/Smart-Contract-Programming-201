@@ -27,6 +27,11 @@ contract Dex is Wallet {
 
     // Public & External Functions
 
+    function depositETH() public payable {
+        balances[msg.sender]["ETH"] += msg.value;
+    }
+
+
     function getOrderBook(bytes32 ticker, Side side) view public returns(Order[] memory) {
         return(orderBook[ticker][uint(side)]);
     }
@@ -57,8 +62,12 @@ contract Dex is Wallet {
     }
 
 
-    function depositETH() public payable {
-        balances[msg.sender]["ETH"] += msg.value;
+    function createMarketOrder(bytes32 ticker, Side side, uint amount)
+        external
+//        isKnownToken(ticker)
+    {
+        // TODO - IMPLEMENT!
+
     }
 
 

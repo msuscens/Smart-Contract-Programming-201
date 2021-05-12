@@ -30,6 +30,14 @@ contract Wallet is Ownable {
     }
 
 
+    function getBalance(address account, bytes32 ticker)
+        view
+        external
+        returns(uint amount)
+    {
+        return balances[account][ticker];
+    }
+
     // Deposit tokens into the wallet (must be the owner of token in ERC20 token contract).
     // Ie. The wallet contact needs to instruct the token contract to transfer the amount
     // of tokens from the owner's address to the wallet contract's address.

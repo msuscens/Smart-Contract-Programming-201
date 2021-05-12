@@ -2,7 +2,7 @@ const Dex = artifacts.require("Dex")
 const LinkMock = artifacts.require("LinkMock")
 const truffleAssert = require('truffle-assertions')
 
-contract("Dex", accounts => {
+contract.skip("Dex", accounts => {
 
     let dex, link
 
