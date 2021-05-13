@@ -256,7 +256,7 @@ contract.skip("Dex", accounts => {
         const buyOrder = buyOrderBook[buyOrderBook.length-1]
 
         assert.equal(
-            buyOrder.trader, accounts[0],
+            buyOrder.maker, accounts[0],
             "Order's account doesn't match user's account!"
         )
         assert.equal(
@@ -295,7 +295,7 @@ contract.skip("Dex", accounts => {
         const sellOrder = sellOrderBook[sellOrderBook.length-1]
 
         assert.equal(
-            sellOrder.trader, accounts[0],
+            sellOrder.maker, accounts[0],
             "Order's account doesn't match user's account!"
         )
         assert.equal(

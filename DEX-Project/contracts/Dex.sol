@@ -12,7 +12,7 @@ contract Dex is Wallet {
 
     struct Order {
         uint id;
-        address trader;
+        address maker;
         Side side;
         bytes32 ticker;
         uint amount;
@@ -20,29 +20,31 @@ contract Dex is Wallet {
         uint filled;
     }
 
+    event EthDeposited(address depositor, uint amountInWei);
     event LimitOrderCreated(
-        bytes32 ticker,
         Side side,
+        bytes32 ticker,
         uint price,
         uint amount
     );
     event TradeExecuted(
+        Side side,
         address taker, 
         address maker, 
         bytes32 ticker, 
-        uint amount, 
+        uint fillAmount, 
         uint price, 
-        Side side
+        uint totalWei
+    );
+    event MarketOrderProcessed(
+        Side side,
+        address taker, 
+        bytes32 ticker,
+        uint orderAmount, 
+        uint totalAmountFilled 
     );
 
-    // Events - for testing purposes only
-    event EnteredCreateMO(bytes32 ticker, Side side, uint amount);
-    event AboutToProcessMO(bytes32 ticker, Side side, uint amount);
-    event AmountLeftToFill(uint amount);
-    event AboutToTrade();
-    event InsideRemoveFilled();
     
-
     // State variables
 
     mapping(bytes32 => mapping(uint => Order[])) public orderBook;    //Ticker => (Side => orders)
@@ -53,6 +55,7 @@ contract Dex is Wallet {
 
     function depositETH() public payable {
         balances[msg.sender]["ETH"] += msg.value;
+        emit EthDeposited(msg.sender, msg.value);
     }
 
 
@@ -86,7 +89,7 @@ contract Dex is Wallet {
         else //Sell-side
             _sortToAscendingPrice(orders);
 
-        emit LimitOrderCreated(ticker, side, price, amount);
+        emit LimitOrderCreated(side, ticker, price, amount);
     }
 
 
@@ -94,11 +97,12 @@ contract Dex is Wallet {
         external
         isKnownToken(ticker)
     {
-        emit EnteredCreateMO(ticker, side, amount);    //DEBUGGING
-
         uint otherSide;
         if (side == Side.SELL) {
-            require(balances[msg.sender][ticker] >= amount);
+            require(
+                balances[msg.sender][ticker] >= amount,
+                "Insufficent token balance!"
+            );
             otherSide = 0;  //Buy-side
         }
         else if (side == Side.BUY) otherSide = 1; //Sell-side
@@ -107,48 +111,39 @@ contract Dex is Wallet {
         Order[] storage orders = orderBook[ticker][otherSide];
         uint totalFilled;
 
-        emit AboutToProcessMO(ticker, side, amount);    //DEBUGGING
-
         for (uint i = 0; (totalFilled < amount) && (i < orders.length); i++) {
-            // Calculate amount of market order fillable from current limit order
+
+            // Calculate amount of market order to fill from current limit order
             uint leftToFill = amount - totalFilled;
+            uint availableToFill = orders[i].amount - orders[i].filled;
+            bool fillAllMarketOrder = (availableToFill >= leftToFill );
+            uint toFillNow = fillAllMarketOrder? leftToFill : availableToFill;
 
-            emit AmountLeftToFill(leftToFill);  //DEBUGGING
+            orders[i].filled += toFillNow;
+            totalFilled += toFillNow;
 
-            if ((orders[i].amount - orders[i].filled) >= leftToFill ) {  
-                // Complete fill of market order from current limit order
-                orders[i].filled += leftToFill;
-                totalFilled += leftToFill;
-                assert(totalFilled == amount); //Fill calculation error?
+            // Invariant check for fill calculation
+            fillAllMarketOrder?
+                assert(totalFilled == amount) :
+                assert(orders[i].filled == orders[i].amount);
 
-                _executeTrade(
-                    msg.sender,
-                    orders[i].trader,
-                    ticker,
-                    leftToFill,
-                    orders[i].price,
-                    side
-                );
-            }
-            else {  
-                // Partially fill market order (from current limit order)
-                uint amountAvailable = orders[i].amount - orders[i].filled;
-                orders[i].filled += amountAvailable;
-                totalFilled += amountAvailable;
-                assert(orders[i].filled == orders[i].amount); //Calc. error?
-
-                _executeTrade(
-                    msg.sender,
-                    orders[i].trader,
-                    ticker,
-                    amountAvailable,
-                    orders[i].price,
-                    side
-                );
-            }
+            _executeTrade(
+                msg.sender,
+                orders[i],
+                toFillNow,
+                side
+            );
         }
-        // Remove 100% filled orders from the orderbook
+        // Remove 100% filled limit orders from order book
         _removeFilled(orders);
+
+        emit MarketOrderProcessed(
+            side,
+            msg.sender, 
+            ticker,
+            amount, 
+            totalFilled
+        );
     }
 
 
@@ -187,28 +182,36 @@ contract Dex is Wallet {
 
     function _executeTrade(
         address taker,  // creator of market order
-        address maker,  // creator of limit order
-        bytes32 ticker,
-        uint amount,
-        uint price,
+        Order storage limitOrder,
+        uint fillAmount,
         Side side
     )
         internal
     {
-        // emit AboutToTrade();    //DEBUGGING
-
-        uint valueInWei = price * amount;
+        uint valueInWei = limitOrder.price * fillAmount;
         if (side == Side.BUY) {
             require(
                 balances[taker]["ETH"] >= valueInWei,
                 "Not enough ETH to complete fill!"
             );
-            _shiftBalances(taker, maker, ticker, amount, valueInWei);
+            _shiftBalances(
+                taker,
+                limitOrder.maker,
+                limitOrder.ticker,
+                fillAmount,
+                valueInWei
+            );
         }
         else //Sell-side
-            _shiftBalances(maker, taker, ticker, amount, valueInWei);
+            _shiftBalances(
+                limitOrder.maker,
+                taker,
+                limitOrder.ticker,
+                fillAmount,
+                valueInWei
+            );
 
-        emit TradeExecuted(taker, maker, ticker, amount, price, side);
+        emit TradeExecuted(side, taker, limitOrder.maker, limitOrder.ticker, fillAmount, limitOrder.price, valueInWei);
     }
 
 
@@ -230,7 +233,6 @@ contract Dex is Wallet {
 
     function _removeFilled(Order[] storage orders) internal {
         // Find where filled orders end in order book
- //       emit InsideRemoveFilled();  //DEBUGGING
         uint i;
         while ((i < orders.length) && (orders[i].filled == orders[i].amount))
             i++;
@@ -241,7 +243,6 @@ contract Dex is Wallet {
 
         // Remove redundant orders (from end of orderbook) 
         for (uint k = 0; k < i; k++) orders.pop();
-
     }
 
 }

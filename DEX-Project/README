@@ -108,6 +108,11 @@ licencing warnings)
 Test using the dexMarketOrderTests (ie.'truffle test'), to debug the solidity
 code (and refine test scripts in the process), until all tests pass. 
 
+17. Refactor Dex & Wallet contracts, adding events for: TokenAdded,
+EthDeposited, TokensDeposited, TokensWithdrawn, LimitOrderCreated, 
+TradeExecuted, and MarketOrderProcessed.
+
+
 
 
 

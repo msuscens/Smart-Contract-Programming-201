@@ -684,11 +684,11 @@ contract("Dex", accounts => {
             web3.utils.utf8ToHex("LINK")
         )
         const firstSellersLinkBefore = await dex.getBalance(
-            sellOrderBook[0].trader, 
+            sellOrderBook[0].maker, 
             web3.utils.utf8ToHex("LINK")
         )
         const secondSellersLinkBefore = await dex.getBalance(
-            sellOrderBook[1].trader, 
+            sellOrderBook[1].maker, 
             web3.utils.utf8ToHex("LINK")
         )
 
@@ -721,11 +721,11 @@ contract("Dex", accounts => {
             web3.utils.utf8ToHex("LINK")
         )
         const firstSellersLinkAfter = await dex.getBalance(
-            sellOrderBook[0].trader,
+            sellOrderBook[0].maker,
             web3.utils.utf8ToHex("LINK")
         )
         const secondSellersLinkAfter = await dex.getBalance(
-            sellOrderBook[1].trader, 
+            sellOrderBook[1].maker, 
             web3.utils.utf8ToHex("LINK")
         )
         assert.equal(
