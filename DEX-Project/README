@@ -104,6 +104,9 @@ licencing warnings)
 15. Write tests for Dex's createMarketOrder function (yet to be implemented).
 (ie. TDD approach, with tests in ./tests/dexMarketOrderTests.js)
 
+16. Write Dex contract's createMarketOrder function (and related functionality).
+Test using the dexMarketOrderTests (ie.'truffle test'), to debug the solidity
+code (and refine test scripts in the process), until all tests pass. 
 
 
 

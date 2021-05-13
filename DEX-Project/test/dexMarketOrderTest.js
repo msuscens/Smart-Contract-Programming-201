@@ -16,7 +16,7 @@ contract("Dex", accounts => {
         // For account[0]: Add intial amount of LINK and ETH (in Wei)
         await link.approve(dex.address, 500)
         await dex.deposit(500, web3.utils.utf8ToHex("LINK"))
-        await dex.depositETH({value: 10000})
+        await dex.depositETH({value: 26000})
     })
 
     //When creating a market order it must be for a known token
@@ -274,6 +274,18 @@ contract("Dex", accounts => {
             `${sellOrderBook.length} orders in it!`
         )
 
+        // CHECK SETUP: Buyer has enough ETH for purchase (7,500Wei)?
+        // (Required == 5*300 + 15*400 = 1,500 + 6,000 = 7,500)
+        const buyersWei = await dex.getBalance(
+            accounts[0],
+            web3.utils.utf8ToHex("ETH")
+        )
+        assert.equal(
+            Number(buyersWei) >= 7500,
+            true,
+            `SETUP: Buyer has ${buyersWei} Wei, but needs 7,500 Wei!`
+        )
+
         //TEST: Place Market Order to fill 2 of the 3 limit orders  
         await truffleAssert.passes(
             dex.createMarketOrder(
@@ -343,6 +355,18 @@ contract("Dex", accounts => {
             3, 
             `SETUP: Expected 3 sell-side orders, but order book has `+
             `${sellOrderBook.length} orders in it!`
+        )
+
+        // CHECK SETUP: Buyer has enough ETH for purchase (12,500Wei)?
+        // (Required == 5*300 + 15*400 + 10*500 = 1500 + 6000 + 5000)
+        const buyersWei = await dex.getBalance(
+            accounts[0],
+            web3.utils.utf8ToHex("ETH")
+        )
+        assert.equal(
+            Number(buyersWei) >= 12500,
+            true,
+            `SETUP: Buyer has ${buyersWei} Wei, but needs 12,500 Wei!`
         )
 
         //TEST: Place buy Market Order that will fill all sell orders
@@ -436,6 +460,13 @@ contract("Dex", accounts => {
             web3.utils.utf8ToHex("ETH")
         )
 
+        // CHECK SETUP: Buyer has enough ETH for the purchase (3,500Wei)?
+        assert.equal(
+            Number(buyersWeiBefore) >= 3500,
+            true,
+            `SETUP: Buyer has ${buyersWeiBefore} Wei, but needs 3,500 Wei!`
+        )
+
         //TEST: Buy from sell-side Orderbook : 
         //          5xLINK @ 300 = 1500Wei, 5xLINK @ 400 = 2000Wei
         //          Total 10xLINK, for 3,500 Wei
@@ -469,9 +500,15 @@ contract("Dex", accounts => {
         )
         assert.equal(
             sellOrderBook[0].amount, 
-            10, 
+            15, 
             `POST-TEST: Unexpected sellOrderBook[0].amount: `+
             `${sellOrderBook[0].amount}`
+        )
+        assert.equal(
+            sellOrderBook[0].filled, 
+            5, 
+            `POST-TEST: Unexpected sellOrderBook[0].filled: `+
+            `${sellOrderBook[0].filled}`
         )
         assert.equal(
             sellOrderBook[1].price, 
@@ -484,6 +521,12 @@ contract("Dex", accounts => {
             10, 
             `POST-TEST: Unexpected sellOrderBook[1].amount: `+
             `${sellOrderBook[1].amount}`
+        )
+        assert.equal(
+            sellOrderBook[1].filled, 
+            0, 
+            `POST-TEST: Unexpected sellOrderBook[1].filled: `+
+            `${sellOrderBook[1].filled}`
         )
 
         //POST-TEST CHECK: Buyer's and seller's ETH balances correctly updated?
@@ -503,7 +546,7 @@ contract("Dex", accounts => {
             Number(buyersWeiBefore), 
             Number(buyersWeiAfter)+3500,
             `POST-TEST: Bought 10 LINK for 3,500 Wei but intial balance was `+
-            `${ethInWeiBefore} Wei and now is ${ethInWeiAfter} Wei.`
+            `${buyersWeiBefore} Wei and now is ${buyersWeiAfter} Wei.`
         )
         assert.equal(
             Number(firstSellersWeiBefore)+1500, 
@@ -511,6 +554,7 @@ contract("Dex", accounts => {
             `POST-TEST: Sold 5 LINK for 1,500 Wei but intial balance was `+
             `${firstSellersWeiBefore} and now is ${firstSellersWeiAfter} Wei`
         )
+
         assert.equal(
             Number(secondSellersWeiBefore)+2000, Number(secondSellersWeiAfter),
             `POST-TEST: Should have sold 5 LINK for 2,000 Wei but intial balance was `+
@@ -528,8 +572,8 @@ contract("Dex", accounts => {
         )
         assert.equal(
             sellOrderBook.length, 
-            0, 
-            `SETUP: Expected an empty sell-side order book, but it has `+
+            2, 
+            `SETUP: Expected 2 sell-side orders, but order book has `+
             `${sellOrderBook.length} orders in it!`
         )
 
@@ -574,6 +618,12 @@ contract("Dex", accounts => {
             `${sellOrderBook[0].amount}`
         )
         assert.equal(
+            sellOrderBook[0].filled,
+            0, 
+            `SETUP: Unexpected sellOrderBook[0].filled: `+
+            `${sellOrderBook[0].filled}`
+        )
+        assert.equal(
             sellOrderBook[1].price, 
             400, 
             `SETUP: Unexpected sellOrderBook[1].price: `+
@@ -581,9 +631,15 @@ contract("Dex", accounts => {
         )
         assert.equal(
             sellOrderBook[1].amount, 
-            10, 
+            15, 
             `SETUP: Unexpected sellOrderBook[1].amount: `+
             `${sellOrderBook[1].amount}`
+        )
+        assert.equal(
+            sellOrderBook[1].filled,
+            5, 
+            `SETUP: Unexpected sellOrderBook[1].filled: `+
+            `${sellOrderBook[1].filled}`
         )
         assert.equal(
             sellOrderBook[2].price, 
@@ -598,6 +654,12 @@ contract("Dex", accounts => {
             `${sellOrderBook[2].amount}`
         )
         assert.equal(
+            sellOrderBook[2].filled,
+            0, 
+            `SETUP: Unexpected sellOrderBook[2].filled: `+
+            `${sellOrderBook[2].filled}`
+        )
+        assert.equal(
             sellOrderBook[3].price,
             500, 
             `SETUP: Unexpected sellOrderBook[3].price: `+
@@ -609,19 +671,37 @@ contract("Dex", accounts => {
             `SETUP: Unexpected sellOrderBook[3].amount: `+
             `${sellOrderBook[3].amount}`
         )
+        assert.equal(
+            sellOrderBook[3].filled,
+            0, 
+            `SETUP: Unexpected sellOrderBook[3].filled: `+
+            `${sellOrderBook[3].filled}`
+        )
        
-        //CHECK: Starting LINK balance of seller(s) and buyer   
+        //CHECK: Starting LINK balance of buyer & seller(s)   
         const buyersLinkBefore = await dex.getBalance(
             accounts[3], 
             web3.utils.utf8ToHex("LINK")
         )
         const firstSellersLinkBefore = await dex.getBalance(
-            accounts[0], 
+            sellOrderBook[0].trader, 
             web3.utils.utf8ToHex("LINK")
         )
         const secondSellersLinkBefore = await dex.getBalance(
-            accounts[1], 
+            sellOrderBook[1].trader, 
             web3.utils.utf8ToHex("LINK")
+        )
+
+        // CHECK SETUP: Buyer has enough ETH for purchase (3,500Wei)?
+        // (Required == 5*300 + 5*400 = 1500 + 2000 = 3,500)
+        const buyersWei = await dex.getBalance(
+            accounts[3],
+            web3.utils.utf8ToHex("ETH")
+        )
+        assert.equal(
+            Number(buyersWei) >= 3500,
+            true,
+            `SETUP: Buyer has ${buyersWei} Wei, but needs 12,500 Wei!`
         )
 
         //TEST: Create buy market order (to fill 1.5 sell-side limit orders)
@@ -630,22 +710,22 @@ contract("Dex", accounts => {
                web3.utils.utf8ToHex("LINK"),
                0,   //Buy-side
                10,  //amount
-               {from: accounts[1]}
+               {from: accounts[3]}
            ),
            "Create Buy Limit Order failed for unknown reason!"
         )
 
         //POST-TEST CHECK: Seller's and buyer's LINK balances correctly updated?
         const buyersLinkAfter = await dex.getBalance(
-            accounts[1], 
+            accounts[3], 
             web3.utils.utf8ToHex("LINK")
         )
         const firstSellersLinkAfter = await dex.getBalance(
-            accounts[0],
+            sellOrderBook[0].trader,
             web3.utils.utf8ToHex("LINK")
         )
         const secondSellersLinkAfter = await dex.getBalance(
-            accounts[1], 
+            sellOrderBook[1].trader, 
             web3.utils.utf8ToHex("LINK")
         )
         assert.equal(
@@ -655,13 +735,13 @@ contract("Dex", accounts => {
             `${buyersLinkBefore} LINK and is now ${buyersLinkAfter} LINK.`
         )
         assert.equal(
-            Number(firstSellersLinkAfter), 
+            Number(firstSellersLinkBefore), 
             Number(firstSellersLinkAfter)+5,
             `POST-TEST: First seller sold 5 LINK but their intial balance was `+
             `${firstSellersLinkBefore} LINK and is now ${firstSellersLinkAfter} LINK.`
         )
         assert.equal(
-            Number(secondSellersLinkAfter),
+            Number(secondSellersLinkBefore),
             Number(secondSellersLinkAfter)+5,
             `POST-TEST: Second seller sold 5 LINK (of 10 for sale) but their intial balance `+
             `was ${secondSellersLinkBefore} LINK and is now ${secondSellersLinkAfter} LINK.`
@@ -711,6 +791,7 @@ contract("Dex", accounts => {
             `SETUP: Expected 5 sell-side orders, but order book has `+
             `${sellOrderBook.length} orders in it!`
         )
+
         assert.equal(
             sellOrderBook[0].price, 
             300, 
@@ -724,6 +805,13 @@ contract("Dex", accounts => {
             `${sellOrderBook[0].amount}`
         )
         assert.equal(
+            sellOrderBook[0].filled, 
+            0, 
+            `SETUP: Unexpected sellOrderBook[0].filled: `+
+            `${sellOrderBook[0].filled}`
+        )
+
+        assert.equal(
             sellOrderBook[1].price, 
             400, 
             `SETUP: Unexpected sellOrderBook[1].price: `+
@@ -731,10 +819,17 @@ contract("Dex", accounts => {
         )
         assert.equal(
             sellOrderBook[1].amount, 
-            10, 
+            15, 
             `SETUP: Unexpected sellOrderBook[1].amount: `+
             `${sellOrderBook[1].amount}`
         )
+        assert.equal(
+            sellOrderBook[1].filled, 
+            10, 
+            `SETUP: Unexpected sellOrderBook[1].filled: `+
+            `${sellOrderBook[1].filled}`
+        )
+
         assert.equal(
             sellOrderBook[2].price,
             400, 
@@ -748,6 +843,13 @@ contract("Dex", accounts => {
             `${sellOrderBook[2].amount}`
         )
         assert.equal(
+            sellOrderBook[2].filled, 
+            0, 
+            `SETUP-TEST: Unexpected sellOrderBook[2].filled: `+
+            `${sellOrderBook[2].filled}`
+        )
+
+        assert.equal(
             sellOrderBook[3].price, 
             400, 
             `SETUP: Unexpected sellOrderBook[3].price: `+
@@ -760,6 +862,13 @@ contract("Dex", accounts => {
             `${sellOrderBook[3].amount}`
         )
         assert.equal(
+            sellOrderBook[3].filled, 
+            0, 
+            `SETUP: Unexpected sellOrderBook[3].filled: `+
+            `${sellOrderBook[3].filled}`
+        )
+
+        assert.equal(
             sellOrderBook[4].price, 
             500, 
             `SETUP: Unexpected sellOrderBook[4].price: `+
@@ -770,6 +879,12 @@ contract("Dex", accounts => {
             10, 
             `SETUP: Unexpected sellOrderBook[4].amount: `+
             `${sellOrderBook[4].amount}`
+        )
+        assert.equal(
+            sellOrderBook[4].filled, 
+            0, 
+            `SETUP: Unexpected sellOrderBook[4].filled: `+
+            `${sellOrderBook[4].filled}`
         )
        
         //TEST: Create buy market order (to fill 1 sell-side limit order)
@@ -829,6 +944,12 @@ contract("Dex", accounts => {
             `POST-TEST: Unexpected sellOrderBook[0].amount: `+
             `${sellOrderBook[0].amount}`
         )
+        assert.equal(
+            sellOrderBook[0].filled, 
+            5, 
+            `POST-TEST: Unexpected sellOrderBook[0].filled: `+
+            `${sellOrderBook[0].filled}`
+        )
     })
 
     //Partly filled (BUY & SELL) limit orders should be modified to represent the filled/remaining amount
@@ -845,6 +966,7 @@ contract("Dex", accounts => {
             `SETUP: Expected single sell-side order, but order book has `+
             `${sellOrderBook.length} orders in it!`
         )
+
         assert.equal(
             sellOrderBook[0].price, 
             500, 
@@ -857,13 +979,31 @@ contract("Dex", accounts => {
             `SETUP: Unexpected sellOrderBook[0].amount: `+
             `${sellOrderBook[0].amount}`
         )
+        assert.equal(
+            sellOrderBook[0].filled, 
+            5, 
+            `SETUP: Unexpected sellOrderBook[0].filled: `+
+            `${sellOrderBook[0].filled}`
+        )
+
+        // CHECK SETUP: Buyer has enough ETH for purchase (2,500Wei)?
+        // (Required == 4*500 = 2,000)
+        const buyersWei = await dex.getBalance(
+            accounts[0],
+            web3.utils.utf8ToHex("ETH")
+        )
+        assert.equal(
+            Number(buyersWei) >= 2000,
+            true,
+            `SETUP: Buyer has ${buyersWei} Wei, but needs 2,000 Wei!`
+        )
 
         //TEST: Create buy market order that will partially fill 1 limit-order
         await truffleAssert.passes(
             dex.createMarketOrder(
                web3.utils.utf8ToHex("LINK"),
                0,   //Buy-side
-               5,   //amount
+               4,   //amount
                {from: accounts[0]}
            ),
            "Create Buy Limit Order failed for unknown reason!"
@@ -896,7 +1036,7 @@ contract("Dex", accounts => {
         )
         assert.equal(
             sellOrderBook[0].filled, 
-            5, 
+            9, 
             `POST-TEST: Unexpected sellOrderBook[0].filled: `+
             `${sellOrderBook[0].filled}`
         )
@@ -906,23 +1046,23 @@ contract("Dex", accounts => {
     it("should throw an error when creating a buy market order with an inadequate ETH balance", async () => {
 
         //SETUP: Place a large sell limit order into the orderbook
-        await link.transfer(accounts[0], 1000)
-        await link.approve(dex.address, 1000, {from: accounts[0]})
+        await link.transfer(accounts[0], 20)
+        await link.approve(dex.address, 20, {from: accounts[0]})
         await dex.deposit(
-            1000,   //amount 
+            20,   //amount 
             web3.utils.fromUtf8("LINK"),
             {from: accounts[0]}
         )
         await dex.createLimitOrder(
             web3.utils.fromUtf8("LINK"), 
             1,      //Sell-side 
-            499,    //price 
-            1000,   //amount 
+            550,    //price 
+            20,     //amount 
             {from: accounts[0]}
         )
 
         //CHECK SETUP: Sell-side orderbook contains expected orders:
-        //        1000xLINK @ 499, 5xLINK @ 500 
+        //        1xLINK @ 500, 20xLINK @ 550 
         let sellOrderBook = await dex.getOrderBook(
             web3.utils.utf8ToHex("LINK"), 
             1   //Sell-side
@@ -933,39 +1073,56 @@ contract("Dex", accounts => {
             `SETUP: Expected 2 sell-side orders, but order book has `+
             `${sellOrderBook.length} orders in it!`
         )
+
         assert.equal(
             sellOrderBook[0].price, 
-            499, 
+            500, 
             `SETUP: Unexpected sellOrderBook[0].price: `+
             `${sellOrderBook[0].price}`
         )
         assert.equal(
             sellOrderBook[0].amount, 
-            1000, 
+            10, 
             `SETUP: Unexpected sellOrderBook[0].amount: `+
             `${sellOrderBook[0].amount}`
         )
         assert.equal(
+            sellOrderBook[0].filled, 
+            9, 
+            `SETUP: Unexpected sellOrderBook[0].filled: `+
+            `${sellOrderBook[0].filled}`
+        )
+
+        assert.equal(
             sellOrderBook[1].price, 
-            500, 
+            550, 
             `SETUP: Unexpected sellOrderBook[1].price: `+
             `${sellOrderBook[1].price}`
         )
         assert.equal(
             sellOrderBook[1].amount,
-            5, 
+            20, 
             `SETUP: Unexpected sellOrderBook[1].amount: `+
             `${sellOrderBook[1].amount}`
         )
+        assert.equal(
+            sellOrderBook[1].filled, 
+            0, 
+            `SETUP: Unexpected sellOrderBook[1].filled: `+
+            `${sellOrderBook[1].filled}`
+        )
 
-        // CHECK SETUP: Buyer shouldn't have enough ETH market order buy
-        const weiBalance = await dex.getBalance(
-            accounts[1], 
+        // CHECK SETUP: Buyer SHOULDN'T have ETH for purchase
+        // (Purchase == 1*500 + 20*550 = 500 + 11,000 = 11,500)
+        const buyersWei = await dex.getBalance(
+            accounts[3],
             web3.utils.utf8ToHex("ETH")
         )
-        assert(
-            Number(weiBalance) < 499*1000, 
-            "Buyer must have less ETH inorder to run this test!"
+        assert.equal(
+            Number(buyersWei) < 11500,
+            true,
+            `SETUP: Buyer's balance must be less than 11,500 Wei `+
+            `but is ${buyersWei} Wei!`
         )
 
         //TEST: Create buy market order that will cost more than buyer's
@@ -973,12 +1130,11 @@ contract("Dex", accounts => {
         await truffleAssert.reverts(
             dex.createMarketOrder(
                web3.utils.utf8ToHex("LINK"),
-               0,    //Buy-side
-               1000, //amount
-               {from: accounts[1]}
-           ),
-           "Should not be able to create a buy Market Order with insufficeint ETH!"
+               0,   //Buy-side
+               21,  //amount
+               {from: accounts[3]}
+           )
         )  
     })
-    
+
 })
